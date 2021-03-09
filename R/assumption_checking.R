@@ -1,8 +1,8 @@
 library(tidyverse)  # For easier table manipulation
-library(ggfortify)  # Plot lm objects using ggplot instead of base R
+library(ggfortify)  # Plot lm objects using ggplot2::ggplot instead of base R
 library(car)  # For added-variable plots, dfbetas and dffits
 library(corrplot)  # For colored correlation matrix
-library(gridExtra)  # For putting multiple ggplots in one plot
+library(gridExtra)  # For putting multiple ggplot2::ggplots in one plot
 
 #' Scatterplot matrix
 #'
@@ -35,30 +35,32 @@ point_matrix <- function(data) {
 #' @export
 cor_graphic <- function(data) {
   par(mfrow = c(1, 2))
-  corrplot(cor(data), method = "number", type = "upper", diag = F, tl.col = "#1f3366", cl.pos = "n")
+  corrplot::corrplot(cor(data), method = "number", type = "upper", diag = F,
+                     tl.col = "#1f3366", cl.pos = "n")
   title("Correlation Coefficients")
-  corrplot(cor(data), type = "upper", diag = F, tl.col = "#1f3366", cl.pos = "n")
+  corrplot::corrplot(cor(data), type = "upper", diag = F, tl.col = "#1f3366",
+                     cl.pos = "n")
   title("Correlation Matrix")
 }
 
 #' Residuals Vs Fitted Values Plot
 #'
-#' `resid_vs_fitted` uses `autoplot` to create a square residuals vs fitted
+#' `resid_vs_fitted` uses `ggfortify::autoplot` to create a square residuals vs fitted
 #' values plot with a nice theme
 #'
 #' @param model A linear regression model of class `stats::lm`
 #'
 #' @export
 resid_vs_fitted <- function(model) {
-  autoplot(model, which = 1, ncol = 1) +
-    theme_minimal() +
-    theme(aspect.ratio = 1)
+  ggfortify::autoplot(model, which = 1, ncol = 1) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(aspect.ratio = 1)
 }
 
 #' Residuals vs Predictor Plot
 #'
 #' A helper function for resid_vs_pred. Plots the residuals vs the predictor for
-#' a single predictor variable. Returns a ggplot object.
+#' a single predictor variable. Returns a ggplot2::ggplot object.
 #'
 #' @param data A dataframe containing one or more columns including the
 #' predictor variable.
@@ -67,21 +69,21 @@ resid_vs_fitted <- function(model) {
 #' @param predictor A string. The name of the column in `data` to be used as the
 #' predictor variable.
 rpred_col <- function(data, residuals, predictor) {
-  ggplot(data = data,
-         mapping = aes(x = pull(data, predictor),
+  ggplot2::ggplot(data = data,
+         mapping = ggplot2::aes(x = pull(data, predictor),
                        y = residuals)) +
-    geom_point() +
-    geom_smooth(se = FALSE, span = 0.95, n = 7, size = 0.5) +
-    geom_abline(slope = 0, intercept = 0, linetype = "dashed") +
-    theme_minimal() +
-    theme(aspect.ratio = 1) +
-    xlab(predictor) +
-    ylab("Residuals")
+    ggplot2::geom_point() +
+    ggplot2::geom_smooth(se = FALSE, span = 0.95, n = 7, size = 0.5) +
+    ggplot2::geom_abline(slope = 0, intercept = 0, linetype = "dashed") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(aspect.ratio = 1) +
+    ggplot2::xlab(predictor) +
+    ggplot2::ylab("Residuals")
 }
 
 #' Matrix of Residuals Vs Predictor Plots
 #'
-#' `resid_vs_pred` uses ggplot to create a matrix of residual vs predictor plots
+#' `resid_vs_pred` uses ggplot2::ggplot to create a matrix of residual vs predictor plots
 #'
 #' @param A linear regression model of class `stats::lm`
 #'
@@ -107,12 +109,12 @@ jcreg_av <- function(model) {
   rows <- floor(sqrt(length(predictors)))
   cols <- length(predictors) / rows
   par(pty = "s", cex.lab = 2, cex.axis = 1.5)
-  avPlots(model, layout = c(rows, cols), pch = 19)
+  car::avPlots(model, layout = c(rows, cols), pch = 19)
 }
 
 #' Boxplot of residuals
 #'
-#' Uses ggplot to create a nicely formatted box plot of the residuals of a model
+#' Uses ggplot2::ggplot to create a nicely formatted box plot of the residuals of a model
 #'
 #' @param model A linear regression model of class `stats::lm`
 #'
@@ -122,23 +124,23 @@ jcreg_av <- function(model) {
 #' @export
 jcreg_boxplot <- function(model) {
   residuals <- data.frame(residuals = resid(model))
-  ggplot(data = residuals, mapping = aes(y = residuals)) +
-    geom_boxplot() +
-    stat_summary(mapping = aes(x = 0),
+  ggplot2::ggplot(data = residuals, mapping = ggplot2::aes(y = residuals)) +
+    ggplot2::geom_boxplot() +
+    ggplot2::stat_summary(mapping = ggplot2::aes(x = 0),
                  fun = mean, geom = "point",
                  shape = 4, size = 2, color = "darkred") +
-    theme_classic() +
-    theme(aspect.ratio = 2,
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank()) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(aspect.ratio = 2,
+          axis.text.x = ggplot2::element_blank(),
+          axis.ticks.x = ggplot2::element_blank()) +
     #  scale_y_continuous(limits = c(-20000, 30000), breaks = seq(-20000, 30000, 10000)) +
-    ylab("Residuals") +
-    xlab("")
+    ggplot2::ylab("Residuals") +
+    ggplot2::xlab("")
 }
 
 #' Histogram of Residuals
 #'
-#' Uses ggplot to create a nicely formatted histogram of the residuals of a
+#' Uses ggplot2::ggplot to create a nicely formatted histogram of the residuals of a
 #' model overlaid with a normal curve.
 #'
 #' @param model A linear regression model of class `stats::lm`
@@ -146,30 +148,30 @@ jcreg_boxplot <- function(model) {
 #' @export
 jcreg_hist <- function(model) {
   residuals <- data.frame(residuals = resid(model))
-  ggplot(data = residuals, mapping = aes(x = residuals)) +
-    geom_histogram(binwidth = sd(residuals$residuals / 4), mapping = aes(y = ..density..)) +
-    stat_function(fun = dnorm,
+  ggplot2::ggplot(data = residuals, mapping = ggplot2::aes(x = residuals)) +
+    ggplot2::geom_histogram(binwidth = sd(residuals$residuals / 4), mapping = ggplot2::aes(y = ..density..)) +
+    ggplot2::stat_function(fun = dnorm,
                   color = "blue",
                   args = list(mean = 0,
                               sd = sd(residuals$residuals)),
                   size = 1.2) +
-    xlab("Residuals") +
-    ylab("Density") +
-    theme_light()
+    ggplot2::xlab("Residuals") +
+    ggplot2::ylab("Density") +
+    ggplot2::theme_light()
 }
 
 #' Quantile - Quantile Plot
 #'
-#' Uses `autoplot` to plot a square, nicely-formatted Q-Q Plot of the residuals
+#' Uses `ggfortify::autoplot` to plot a square, nicely-formatted Q-Q Plot of the residuals
 #' of a linear model.
 #'
 #' @param model A linear regression model of class `stats::lm`
 #'
 #' @export
 jcreg_qq <- function(model) {
-  autoplot(model, which = 2, ncol = 1) +
-    theme_bw() +
-    theme(aspect.ratio = 1)
+  ggfortify::autoplot(model, which = 2, ncol = 1) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(aspect.ratio = 1)
 }
 
 #' Cook's Distance Plot
@@ -185,25 +187,25 @@ jcreg_cooksd <- function(model, nLabels = 3) {
   cooks_d <- cooks.distance(model)
   top_cd <- as.numeric(names(sort(cooks_d, decreasing = TRUE)[1:nLabels]))
 
-  ggplot() +
-    geom_point(data = tibble(cooks_d),
-               mapping = aes(x = as.numeric(names(cooks_d)),
+  ggplot2::ggplot() +
+    ggplot2::geom_point(data =tidyverse::tibble(cooks_d),
+               mapping = ggplot2::aes(x = as.numeric(names(cooks_d)),
                              y = cooks_d)) +
-    geom_text(mapping = aes(x = top_cd,
+    ggplot2::geom_text(mapping = ggplot2::aes(x = top_cd,
                             y = cooks_d[top_cd] + max(cooks_d) / 40,
                             label = top_cd)) +
-    theme_bw() +
-    ylab("Cook's Distance") +
-    xlab("Observation Number") +
-    geom_hline(mapping = aes(yintercept = 4 / length(cooks_d)),
+    ggplot2::theme_bw() +
+    ggplot2::ylab("Cook's Distance") +
+    ggplot2::xlab("Observation Number") +
+    ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 4 / length(cooks_d)),
                color = "red", linetype = "dashed") +
-    theme(aspect.ratio = 1)
+    ggplot2::theme(aspect.ratio = 1)
 }
 
 #' DFBETAS Plot
 #'
 #' A helper function for `jcreg_dfbetas`. Plots the DFBETAS for a single
-#' predictor variable. Returns a ggplot object.
+#' predictor variable. Returns a ggplot2::ggplot object.
 #'
 #' @param df_betas A dataframe containing one or more columns including the
 #' DFBETAS of the predict variable.
@@ -219,26 +221,26 @@ dfb_col <- function(df_betas, predictor, nLabels = 3) {
     pull(predictor)
   top_ind <- which(pull(df_betas, predictor) %in% top_vals)
 
-  out <- ggplot() +
-    geom_point(data = df_betas,
-               mapping = aes(x = as.numeric(rownames(df_betas)),
+  out <- ggplot2::ggplot() +
+    ggplot2::geom_point(data = df_betas,
+               mapping = ggplot2::aes(x = as.numeric(rownames(df_betas)),
                              y = abs(pull(df_betas, predictor)))) +
-    geom_text(mapping = aes(x = top_ind,
+    ggplot2::geom_text(mapping = ggplot2::aes(x = top_ind,
                             y = abs(pull(df_betas, predictor)[top_ind]) + 0.07,
                             label = top_ind)) +
-    theme_bw() +
-    theme(aspect.ratio = 1) +
-    ylab("Abs of DFBETAS") +
-    xlab("Observation Number") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(aspect.ratio = 1) +
+    ggplot2::ylab("Abs of DFBETAS") +
+    ggplot2::xlab("Observation Number") +
     ggtitle(predictor)
 
   if(length(dfbetas) <= 30) {
     out <- out +
-      geom_hline(mapping = aes(yintercept = 1),
+      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1),
                  color = "red", linetype = "dashed")
   }else {
     out <- out +
-      geom_hline(mapping = aes(yintercept = 2 / sqrt(length(dfbetas))),
+      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 2 / sqrt(length(dfbetas))),
                  color = "red", linetype = "dashed")
   }
   return(out)
@@ -255,11 +257,11 @@ dfb_col <- function(df_betas, predictor, nLabels = 3) {
 #' @export
 jcreg_dfbetas <- function(model, nLabels = 3) {
   predictors <- attr(model$terms, "term.labels")
-  df_betas <- as_tibble(dfbetas(model)[, predictors])
+  df_betas <-  tidyverse::as_tibble(dfbetas(model)[, predictors])
 
   plots <- lapply(predictors, dfb_col, df_betas = df_betas)
   plots["ncol"] <- ceiling(sqrt(length(plots)))
-  do.call(grid.arrange, plots)
+  do.call(gridExtra::grid.arrange, plots)
 }
 
 #' DFFITS Plot
@@ -275,26 +277,26 @@ jcreg_dffits <- function(model, nLabels = 3) {
   df_fits <- dffits(model)
   top_dff <- as.numeric(names(sort(abs(df_fits), decreasing = TRUE)[1:nLabels]))
 
-  df_fits_plot <- ggplot() +
-    geom_point(data = tibble(df_fits),
-               mapping = aes(x = as.numeric(names(df_fits)),
+  df_fits_plot <- ggplot2::ggplot() +
+    ggplot2::geom_point(data =tidyverse::tibble(df_fits),
+               mapping = ggplot2::aes(x = as.numeric(names(df_fits)),
                              y = abs(df_fits))) +
-    geom_text(mapping = aes(x = top_dff,
+    ggplot2::geom_text(mapping = ggplot2::aes(x = top_dff,
                             y = abs(df_fits[top_dff]) + max(df_fits) / 40,
                             label = top_dff)) +
-    theme_bw() +
-    ylab("Absolute Value of DFFITS for Y") +
-    xlab("Observation Number") +
-    theme(aspect.ratio = 1)
+    ggplot2::theme_bw() +
+    ggplot2::ylab("Absolute Value of DFFITS for Y") +
+    ggplot2::xlab("Observation Number") +
+    ggplot2::theme(aspect.ratio = 1)
   if(length(df_fits) <= 30) {
     df_fits_plot +
-      geom_hline(mapping = aes(yintercept =
+      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept =
                                  2 * sqrt(length(model$coefficients) /
                                             length(df_fits))),
                  color = "red", linetype = "dashed")
   }else {
     df_fits_plot +
-      geom_hline(mapping = aes(yintercept = 1),
+      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1),
                  color = "red", linetype = "dashed")
   }
 }
