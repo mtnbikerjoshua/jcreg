@@ -44,11 +44,11 @@ cor_graphic <- function(data) {
 #' Residuals Vs Fitted Values Plot
 #'
 #' `resid_vs_fitted` uses `autoplot` to create a square residuals vs fitted
-#'  values plot with a nice theme
+#' values plot with a nice theme
 #'
-#'  @param model A linear regression model of class `stats::lm`
+#' @param model A linear regression model of class `stats::lm`
 #'
-#'  @export
+#' @export
 resid_vs_fitted <- function(model) {
   autoplot(model, which = 1, ncol = 1) +
     theme_minimal() +
