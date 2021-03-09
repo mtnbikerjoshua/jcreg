@@ -281,7 +281,7 @@ jcreg_dffits <- function(model, nLabels = 3) {
                              y = abs(df_fits))) +
     geom_text(mapping = aes(x = top_dff,
                             y = abs(df_fits[top_dff]) + max(df_fits) / 40,
-                            label = top_cd)) +
+                            label = top_dff)) +
     theme_bw() +
     ylab("Absolute Value of DFFITS for Y") +
     xlab("Observation Number") +
