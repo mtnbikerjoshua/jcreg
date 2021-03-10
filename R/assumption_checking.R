@@ -45,14 +45,15 @@ cor_graphic <- function(data) {
 
 #' Residuals Vs Fitted Values Plot
 #'
-#' `resid_vs_fitted` uses `ggfortify::autoplot` to create a square residuals vs fitted
+#' `resid_vs_fitted` uses `autoplot` from `ggfortify` to create a square residuals vs fitted
 #' values plot with a nice theme
 #'
 #' @param model A linear regression model of class `stats::lm`
 #'
 #' @export
 resid_vs_fitted <- function(model) {
-  ggfortify::autoplot(model, which = 1, ncol = 1) +
+  require(ggfortify)
+  autoplot(model, which = 1, ncol = 1) +
     ggplot2::theme_minimal() +
     ggplot2::theme(aspect.ratio = 1)
 }
@@ -94,7 +95,7 @@ resid_vs_pred <- function(model) {
   plots <- lapply(predictors, rpred_col, data = data, residuals = resid(model))
   plots["ncol"] <- ceiling(sqrt(length(plots)))
   plots["top"] <- "Residuals vs Predictors"
-  do.call(grid.arrange, plots)
+  do.call(gridExtra::grid.arrange, plots)
 }
 
 #' Added-Variable Plots
@@ -108,7 +109,7 @@ jcreg_av <- function(model) {
   predictors <- attr(model$terms, "term.labels")
   rows <- floor(sqrt(length(predictors)))
   cols <- length(predictors) / rows
-  par(pty = "s", cex.lab = 2, cex.axis = 1.5)
+  par(pty = "s")
   car::avPlots(model, layout = c(rows, cols), pch = 19)
 }
 
@@ -162,14 +163,15 @@ jcreg_hist <- function(model) {
 
 #' Quantile - Quantile Plot
 #'
-#' Uses `ggfortify::autoplot` to plot a square, nicely-formatted Q-Q Plot of the residuals
+#' Uses `autoplot` from `ggfortify` to plot a square, nicely-formatted Q-Q Plot of the residuals
 #' of a linear model.
 #'
 #' @param model A linear regression model of class `stats::lm`
 #'
 #' @export
 jcreg_qq <- function(model) {
-  ggfortify::autoplot(model, which = 2, ncol = 1) +
+  require(ggfortify)
+  autoplot(model, which = 2, ncol = 1) +
     ggplot2::theme_bw() +
     ggplot2::theme(aspect.ratio = 1)
 }
@@ -188,7 +190,7 @@ jcreg_cooksd <- function(model, nLabels = 3) {
   top_cd <- as.numeric(names(sort(cooks_d, decreasing = TRUE)[1:nLabels]))
 
   ggplot2::ggplot() +
-    ggplot2::geom_point(data =tidyverse::tibble(cooks_d),
+    ggplot2::geom_point(data = tibble::tibble(cooks_d),
                mapping = ggplot2::aes(x = as.numeric(names(cooks_d)),
                              y = cooks_d)) +
     ggplot2::geom_text(mapping = ggplot2::aes(x = top_cd,
@@ -214,6 +216,7 @@ jcreg_cooksd <- function(model, nLabels = 3) {
 #' @param predictor A string. The name of the column in `data` to be used as the
 #' predictor variable.
 dfb_col <- function(df_betas, predictor, nLabels = 3) {
+  require(tibble)
   # Find which observations have the highest dfbetas
   top_vals <- df_betas[predictor] %>%
     arrange(desc(abs(eval(parse(text = predictor))))) %>%
@@ -257,7 +260,7 @@ dfb_col <- function(df_betas, predictor, nLabels = 3) {
 #' @export
 jcreg_dfbetas <- function(model, nLabels = 3) {
   predictors <- attr(model$terms, "term.labels")
-  df_betas <-  tidyverse::as_tibble(dfbetas(model)[, predictors])
+  df_betas <-  tibble::as_tibble(dfbetas(model))[, predictors]
 
   plots <- lapply(predictors, dfb_col, df_betas = df_betas)
   plots["ncol"] <- ceiling(sqrt(length(plots)))
@@ -278,7 +281,7 @@ jcreg_dffits <- function(model, nLabels = 3) {
   top_dff <- as.numeric(names(sort(abs(df_fits), decreasing = TRUE)[1:nLabels]))
 
   df_fits_plot <- ggplot2::ggplot() +
-    ggplot2::geom_point(data =tidyverse::tibble(df_fits),
+    ggplot2::geom_point(data =tibble::tibble(df_fits),
                mapping = ggplot2::aes(x = as.numeric(names(df_fits)),
                              y = abs(df_fits))) +
     ggplot2::geom_text(mapping = ggplot2::aes(x = top_dff,
