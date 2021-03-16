@@ -303,3 +303,95 @@ jcreg_dffits <- function(model, nLabels = 3) {
                  color = "red", linetype = "dashed")
   }
 }
+
+var_selection <- function(data, method = "all", metric = "AIC",
+                          type.measure = "default") {
+  require(bestglm)
+  require(glmnet)
+
+  if(method == "all") method <- c("best_subsets", "forward", "backward",
+                                    "seqrep", "lasso", "elastic")
+  data <- data.frame(data)
+  predictors_matrix <- as.matrix(data[-length(data)])
+  response_matrix <- as.matrix(data[length(data)])
+
+  best_models <- vector(mode = "list", length = length(method))
+  names(best_models) <- method
+
+  if("best_subsets" %in% method) {
+    best_subsets <- bestglm(data, IC = metric, method = "exhaustive")
+    best_models$best_subsets <- best_subsets$BestModel
+  }
+  if("forward" %in% method) {
+    best_subsets <- bestglm(data, IC = metric, method = "forward")
+    best_models$forward <- forward$BestModel
+  }
+  if("backward" %in% method) {
+    backward <- bestglm(data, IC = metric, method = "backward")
+    best_models$backward <- backward$BestModel
+  }
+  if("seqrep" %in% method) {
+    seqrep <- bestglm(data, IC = metric, method = "seqrep")
+    best_models$seqrep <- seqrep$BestModel
+  }
+  if("lasso" %in% method) {
+    lasso <- cv.glmnet(x = predictors_matrix, y = response_matrix,
+                       type.measure = type.measure, alpha = 1)
+    lasso$plot <- autoplot(lasso, label = FALSE) +
+      theme_bw() +
+      theme(aspect.ratio = 1)
+    best_models$lasso <- coef(lasso, s = "lambda.1se")
+  }
+  if("elastic" %in% method) {
+    elastic <- cv.glmnet(x = predictors_matrix, y = response_matrix,
+                       type.measure = type.measure, alpha = 0.5)
+    elastic$plot <- autoplot(elastic, label = FALSE) +
+      theme_bw() +
+      theme(aspect.ratio = 1)
+    best_models$elastic <- coef(elastic, s = "lambda.1se")
+  }
+
+  # Create a matrix to be filled with booleans
+  model_names <- c("Best Subset", "Forward", "Backward",
+                   "Sequential Rep.", "LASSO", "Elastic Net")
+  model_abbr <- c("best_subsets", "forward", "backward",
+                  "seqrep", "lasso", "elastic")
+  models_table <- matrix(ncol = ncol(predictors_matrix),
+                         nrow = length(best_models))
+  rownames(models_table) <- model_names[model_abbr %in% model]
+  colnames(models_table) <- colnames(predictors_matrix)
+
+  # Loop through the models and populate the matrix with the included variables
+  for(i in 1:length(best_models)) {
+    model <- best_models[[i]]
+    # For the shrinkage methods we saved a matrix of the coefficients
+    if("dgCMatrix" %in% class(model)) {
+      models_table[i, ] <-
+        colnames(predictors_matrix) %in%
+        rownames(model)[attr(model, "i") + 1] # +1 for 1 based indexing
+    }
+    # For the other methods we saved the best model
+    else {
+      models_table[i, ] <-
+        colnames(predictors_matrix) %in%
+        names(model$coefficients)
+    }
+  }
+  result <- list(table = models_table,
+       best_models = best_models,
+       best_subsets = best_subsets,
+       forward = forward,
+       backward = backward,
+       seqrep = seqrep,
+       lasso = lasso,
+       elastic = elastic,
+       metric = metric)
+  class(result) <- "var_selection"
+  return(result)
+}
+
+print.var_selection <- function(obj) {
+  # Print the table of results using X's in place of TRUE's
+  noquote(ifelse(obj$table, "X", ""))
+  cat("\nmetric =", metric)
+}
