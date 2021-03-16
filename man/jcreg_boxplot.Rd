@@ -10,7 +10,7 @@ jcreg_boxplot(model)
 \item{model}{A linear regression model of class \code{stats::lm}}
 }
 \description{
-Uses ggplot to create a nicely formatted box plot of the residuals of a model
+Uses ggplot2::ggplot to create a nicely formatted box plot of the residuals of a model
 }
 \examples{
 jcreg_boxplot(lm(mpg ~ cyl, data = mtcars))

@@ -10,6 +10,6 @@ jcreg_hist(model)
 \item{model}{A linear regression model of class \code{stats::lm}}
 }
 \description{
-Uses ggplot to create a nicely formatted histogram of the residuals of a
+Uses ggplot2::ggplot to create a nicely formatted histogram of the residuals of a
 model overlaid with a normal curve.
 }

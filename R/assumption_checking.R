@@ -304,17 +304,52 @@ jcreg_dffits <- function(model, nLabels = 3) {
   }
 }
 
-var_selection <- function(data, method = "all", metric = "AIC",
-                          type.measure = "default") {
-  require(bestglm)
-  require(glmnet)
+#' Variable Selection
+#'
+#' Uses various stepwise selection and shrinkage methods to perform variable
+#' selection for a linear model.
+#'
+#' @param data A data.frame or object coercible to a data.frame whose last
+#'   column is the response variable and whose other columns are the predictor
+#'   variables.
+#' @param method A vector of variable selection methods. Options are
+#'   "best_subsets", "forward", "backward", "seqrep", "lasso", "elastic".
+#' @param metric The metric to use for stepwise selection methods. Passed on to
+#'   `IC` in `bestglm::bestglm`. Options are "AIC", "BIC", "BICg", "BICq",
+#'   "LOOCV", "CV".
+#' @param type.measure Loss to use for cross-validation in shrinkage methods.
+#'   Passed on to `type.measure` in `glmnet::cv.glmnet`. Option are "default",
+#'   "mse", "deviance", "class", "auc", "mae".
+#' @param row Which way to orient the table of results. By default puts methods
+#'   as rows and variables as columns. Can also be "var" which puts variables as
+#'   rows and methods and columns.
+#' @param lambda For shrinkage methods, use "lambda.1se" or "lambda.min"
+#'
+#' @return Output is a list of class `var_selection` and includes a table of
+#'   booleans indicating which variables were included in the best model from
+#'   each selection method, a list containing the best model from each selection
+#'   method and the output of each selection method. Printing this object will
+#'   provide a table of the results. Also note that, for the shrinkage methods,
+#'   there is a plot of loss against lambda saved in the method object
+#'   eg. `my_var_selection$lasso$plot`.For a more detailed summary of the output you
+#'   will soon be able to use `summary`.
+#'
+#' @export
+var_selection <- function(data, method = "all", metric = "BIC",
+                          type.measure = "default", row = "method",
+                          lambda = "lambda.1se") {
+  require(bestglm) # For step-wise selection
+  require(glmnet) # For shrinkage methods
 
   if(method == "all") method <- c("best_subsets", "forward", "backward",
                                     "seqrep", "lasso", "elastic")
-  data <- data.frame(data)
+  data <- as.data.frame(data) # In case `data` is a tibble, etc.
+
+  # `cv.glmnet` requires the predictors and response to be in separate matrices
   predictors_matrix <- as.matrix(data[-length(data)])
   response_matrix <- as.matrix(data[length(data)])
 
+  # A list of best models from each method
   best_models <- vector(mode = "list", length = length(method))
   names(best_models) <- method
 
@@ -323,7 +358,7 @@ var_selection <- function(data, method = "all", metric = "AIC",
     best_models$best_subsets <- best_subsets$BestModel
   }
   if("forward" %in% method) {
-    best_subsets <- bestglm(data, IC = metric, method = "forward")
+    forward <- bestglm(data, IC = metric, method = "forward")
     best_models$forward <- forward$BestModel
   }
   if("backward" %in% method) {
@@ -340,7 +375,7 @@ var_selection <- function(data, method = "all", metric = "AIC",
     lasso$plot <- autoplot(lasso, label = FALSE) +
       theme_bw() +
       theme(aspect.ratio = 1)
-    best_models$lasso <- coef(lasso, s = "lambda.1se")
+    best_models$lasso <- coef(lasso, s = lambda)
   }
   if("elastic" %in% method) {
     elastic <- cv.glmnet(x = predictors_matrix, y = response_matrix,
@@ -348,35 +383,70 @@ var_selection <- function(data, method = "all", metric = "AIC",
     elastic$plot <- autoplot(elastic, label = FALSE) +
       theme_bw() +
       theme(aspect.ratio = 1)
-    best_models$elastic <- coef(elastic, s = "lambda.1se")
+    best_models$elastic <- coef(elastic, s = lambda)
   }
+  if(row == "method") {
+    # Create a matrix to be filled with booleans indicating which variables are
+    #  included in the best model found by each selection method
+    # For `row = "method"` put the methods as rows and the variables as columns
+    method_names <- c("Best Subset", "Forward", "Backward",
+                      "Sequential Rep.", "LASSO", "Elastic Net")
+    method_abbr <- c("best_subsets", "forward", "backward",
+                     "seqrep", "lasso", "elastic")
+    models_table <- matrix(ncol = ncol(predictors_matrix),
+                           nrow = length(best_models))
+    rownames(models_table) <- method_names[method_abbr %in% method]
+    colnames(models_table) <- colnames(predictors_matrix)
 
-  # Create a matrix to be filled with booleans
-  model_names <- c("Best Subset", "Forward", "Backward",
-                   "Sequential Rep.", "LASSO", "Elastic Net")
-  model_abbr <- c("best_subsets", "forward", "backward",
-                  "seqrep", "lasso", "elastic")
-  models_table <- matrix(ncol = ncol(predictors_matrix),
-                         nrow = length(best_models))
-  rownames(models_table) <- model_names[model_abbr %in% model]
-  colnames(models_table) <- colnames(predictors_matrix)
-
-  # Loop through the models and populate the matrix with the included variables
-  for(i in 1:length(best_models)) {
-    model <- best_models[[i]]
-    # For the shrinkage methods we saved a matrix of the coefficients
-    if("dgCMatrix" %in% class(model)) {
-      models_table[i, ] <-
-        colnames(predictors_matrix) %in%
-        rownames(model)[attr(model, "i") + 1] # +1 for 1 based indexing
-    }
-    # For the other methods we saved the best model
-    else {
-      models_table[i, ] <-
-        colnames(predictors_matrix) %in%
-        names(model$coefficients)
+    # Loop through the models and populate the matrix
+    for(i in 1:length(best_models)) {
+      model <- best_models[[i]]
+      # For the shrinkage methods we saved a matrix of the coefficients
+      if("dgCMatrix" %in% class(model)) {
+        models_table[i, ] <-
+          colnames(predictors_matrix) %in%
+          rownames(model)[attr(model, "i") + 1] # +1 for 1 based indexing
+      }
+      # For the other methods we saved the best model as an lm object
+      else {
+        models_table[i, ] <-
+          colnames(predictors_matrix) %in%
+          names(model$coefficients)
+      }
     }
   }
+  else if(row == "var") {
+    # Create a matrix to be filled with booleans indicating which variables are
+    #  included in the best model found by each selection method
+    # For `row = "var"` put the varaibles as rows and the methods as columns
+    method_names <- c("Best Subset", "Forward", "Backward",
+                      "Sequential Rep.", "LASSO", "Elastic Net")
+    method_abbr <- c("best_subsets", "forward", "backward",
+                     "seqrep", "lasso", "elastic")
+    models_table <- matrix(nrow = ncol(predictors_matrix),
+                           ncol = length(best_models))
+    rownames(models_table) <- colnames(predictors_matrix)
+    colnames(models_table) <- method_names[method_abbr %in% method]
+
+    # Loop through the models and populate the matrix with the included variables
+    for(i in 1:length(best_models)) {
+      model <- best_models[[i]]
+      # For the shrinkage methods we saved a matrix of the coefficients
+      if("dgCMatrix" %in% class(model)) {
+        models_table[, i] <-
+          colnames(predictors_matrix) %in%
+          rownames(model)[attr(model, "i") + 1] # +1 for 1 based indexing
+      }
+      # For the other methods we saved the best model as an lm object
+      else {
+        models_table[, i] <-
+          colnames(predictors_matrix) %in%
+          names(model$coefficients)
+      }
+    }
+  }
+  # The table is returned as a matrix of booleans, but will be printed with X's
+  #  in place of TRUE's
   result <- list(table = models_table,
        best_models = best_models,
        best_subsets = best_subsets,
@@ -385,13 +455,21 @@ var_selection <- function(data, method = "all", metric = "AIC",
        seqrep = seqrep,
        lasso = lasso,
        elastic = elastic,
-       metric = metric)
+       metric = metric,
+       type.measure = type.measure)
   class(result) <- "var_selection"
   return(result)
 }
 
+#' Print `var_selection` Object
+#'
+#' Implements a print function for an object of type `var_selection`
+#'
+#' @param obj An object of class `var_selection`
+#'
+#' @export
 print.var_selection <- function(obj) {
   # Print the table of results using X's in place of TRUE's
-  noquote(ifelse(obj$table, "X", ""))
-  cat("\nmetric =", metric)
+  print(ifelse(obj$table, "X", ""), quote = FALSE)
+  cat("\nStepwise Metric =", obj$metric, "\tShrinkage Measure =", obj$type.measure)
 }

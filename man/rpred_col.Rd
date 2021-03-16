@@ -18,5 +18,5 @@ predictor variable.}
 }
 \description{
 A helper function for resid_vs_pred. Plots the residuals vs the predictor for
-a single predictor variable. Returns a ggplot object.
+a single predictor variable. Returns a ggplot2::ggplot object.
 }

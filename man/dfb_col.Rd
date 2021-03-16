@@ -18,5 +18,5 @@ with the data. Its length must be the same as the numer of rows in \code{data}}
 }
 \description{
 A helper function for \code{jcreg_dfbetas}. Plots the DFBETAS for a single
-predictor variable. Returns a ggplot object.
+predictor variable. Returns a ggplot2::ggplot object.
 }

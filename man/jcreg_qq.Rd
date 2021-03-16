@@ -10,6 +10,6 @@ jcreg_qq(model)
 \item{model}{A linear regression model of class \code{stats::lm}}
 }
 \description{
-Uses \code{autoplot} to plot a square, nicely-formatted Q-Q Plot of the residuals
+Uses \code{autoplot} from \code{ggfortify} to plot a square, nicely-formatted Q-Q Plot of the residuals
 of a linear model.
 }

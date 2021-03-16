@@ -10,6 +10,6 @@ resid_vs_fitted(model)
 \item{model}{A linear regression model of class \code{stats::lm}}
 }
 \description{
-\code{resid_vs_fitted} uses \code{autoplot} to create a square residuals vs fitted
+\code{resid_vs_fitted} uses \code{autoplot} from \code{ggfortify} to create a square residuals vs fitted
 values plot with a nice theme
 }

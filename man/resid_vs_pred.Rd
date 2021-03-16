@@ -10,5 +10,5 @@ resid_vs_pred(model)
 \item{A}{linear regression model of class \code{stats::lm}}
 }
 \description{
-\code{resid_vs_pred} uses ggplot to create a matrix of residual vs predictor plots
+\code{resid_vs_pred} uses ggplot2::ggplot to create a matrix of residual vs predictor plots
 }
