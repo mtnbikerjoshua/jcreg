@@ -413,6 +413,7 @@ var_selection <- function(data, method = "all", metric = "BIC",
                           lambda = "lambda.1se") {
   require(bestglm) # For step-wise selection
   require(glmnet) # For shrinkage methods
+  require(ggfortify) # For autoplot of lambdas
 
   if(method[1] == "all") {
     method <- c("best_subsets", "forward", "backward",
