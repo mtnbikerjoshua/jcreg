@@ -1,5 +1,5 @@
 # jcreg
-This package sprang from trying to avoid copying and pasting code repeatedly for my linear regression class. I wanted a more elegant way to check linear regression assumptions and run variable selction methods, so here it is. For now, all the code is in R/assumption_checking.R . There is documentation available for all the funtions via `help()`, but for your reference here is a sort description of each function in the package.<br>
+This package sprang from trying to avoid copying and pasting code repeatedly for my linear regression class. I wanted a more elegant way to check linear regression assumptions and run variable selction methods, so here it is. For now, all the code is in `R/assumption_checking.R`. There is documentation available for all the funtions via `help()`, but for your reference here is a sort description of each function in the package.<br>
 
 | Function        | Description                                                      |
 | --------------- | ---------------------------------------------------------------- |
@@ -15,3 +15,12 @@ This package sprang from trying to avoid copying and pasting code repeatedly for
 | resid_vs_fitted | Square residuals vs fitted values plot                           |
 | resid_vs_pred   | Matrix of residuals vs predictor plots                           |
 | var_selection   | Run multiple variable selection methods and compare the results  |
+
+## Installation
+The `devtools` package provides a convenient function for installing packages from github. You can use it as follows:
+
+```R
+install.packages("devtools")
+library(devtools)
+install_github("https://github.com/mtnbikerjoshua/jcreg")
+```
