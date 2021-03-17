@@ -11,7 +11,7 @@ rpred_col(data, residuals, predictor)
 predictor variable.}
 
 \item{residuals}{A vector or a dataframe containing the residuals assosiated
-with the data. Its length must be the same as the numer of rows in \code{data}}
+with the data. Its length must be the same as the numer of rows in \code{data}.}
 
 \item{predictor}{A string. The name of the column in \code{data} to be used as the
 predictor variable.}

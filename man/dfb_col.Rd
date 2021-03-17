@@ -13,6 +13,10 @@ DFBETAS of the predict variable.}
 \item{predictor}{A string. The name of the column in \code{data} to be used as the
 predictor variable.}
 
+\item{nLabels}{The number of potential influential points to label. Defaults
+to 3. A value of 0 means do not label potential influential points. There
+is currently a bug where it always labels at least one point.}
+
 \item{residuals}{A vector or a dataframe containing the residuals assosiated
 with the data. Its length must be the same as the numer of rows in \code{data}}
 }

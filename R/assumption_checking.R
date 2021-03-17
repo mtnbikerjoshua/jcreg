@@ -1,9 +1,3 @@
-library(tidyverse)  # For easier table manipulation
-library(ggfortify)  # Plot lm objects using ggplot2::ggplot instead of base R
-library(car)  # For added-variable plots, dfbetas and dffits
-library(corrplot)  # For colored correlation matrix
-library(gridExtra)  # For putting multiple ggplot2::ggplots in one plot
-
 #' Scatterplot matrix
 #'
 #' `point_matrix` returns a basic scatterplot matrix of the data input.
@@ -12,43 +6,61 @@ library(gridExtra)  # For putting multiple ggplot2::ggplots in one plot
 #' plots and solid points. Note that for best results you should set your plot
 #' size to be square.
 #'
-#' @param data The coordinates of points given as numeric columns of a matrix
-#' or data frame. See parameter `x` in `pairs()` for more detail.
+#' @param data The coordinates of points given as numeric columns of a matrix or
+#'   data frame. See parameter `x` in `pairs()` for more detail.
+#' @param pch Point type passed on to `pairs`.
 #'
 #' @examples
-#' point_matrix(mtcars)
+#' point_matrix(bodyfat)
+#' point_matrix(mtcars[ ,c("mpg", "disp", "hp", "drat")])
 #'
 #' @export
-point_matrix <- function(data) {
+point_matrix <- function(data, pch = 19) {
   par(pty = "s", las = 1)
-  pairs(data, pch = 19, lower.panel = NULL)
+  pairs(data, pch = pch, lower.panel = NULL)
 }
 
 #' Correlation Plots
 #'
 #' `cor_graphic` uses the "corrplot" package to create a nice graphic with a
-#' color-coded correlation matrix and correlation plot side-by-side
+#' color-coded correlation matrix and correlation plot side-by-side. Note that
+#' if plot dimensions are too short or too small, there will be overlapping.
 #'
 #' @param data A numeric vector, matrix or data frame to be used as input to
-#' `cor`
+#'   `cor`
+#' @param show_key If TRUE, will show a color key.
+#' @param title If FALSE, will hide titles.
+#'
+#' @examples
+#' cor_graphic(bodyfat)
 #'
 #' @export
-cor_graphic <- function(data) {
+cor_graphic <- function(data, show_key = FALSE, title = TRUE) {
   par(mfrow = c(1, 2))
   corrplot::corrplot(cor(data), method = "number", type = "upper", diag = F,
                      tl.col = "#1f3366", cl.pos = "n")
-  title("Correlation Coefficients")
-  corrplot::corrplot(cor(data), type = "upper", diag = F, tl.col = "#1f3366",
-                     cl.pos = "n")
-  title("Correlation Matrix")
+  if(title) title("Correlation Coefficients")
+  if (show_key) {
+    corrplot::corrplot(cor(data), type = "upper", diag = F, tl.col = "#1f3366")
+  }
+  else {
+    corrplot::corrplot(cor(data), type = "upper", diag = F, tl.col = "#1f3366",
+                       cl.pos = "n")
+  }
+  if(title) title("Correlation Matrix")
 }
 
 #' Residuals Vs Fitted Values Plot
 #'
-#' `resid_vs_fitted` uses `autoplot` from `ggfortify` to create a square residuals vs fitted
-#' values plot with a nice theme
+#' `resid_vs_fitted` uses `autoplot` from `ggfortify` to create a square
+#' residuals vs fitted values plot with a nice theme
 #'
-#' @param model A linear regression model of class `stats::lm`
+#' @param model A linear regression model of class `stats::lm`.
+#'
+#' @return Returns a ggplot object
+#'
+#' @examples
+#' resid_vs_fitted(lm(brozek ~ ., data = bodyfat))
 #'
 #' @export
 resid_vs_fitted <- function(model) {
@@ -64,11 +76,11 @@ resid_vs_fitted <- function(model) {
 #' a single predictor variable. Returns a ggplot2::ggplot object.
 #'
 #' @param data A dataframe containing one or more columns including the
-#' predictor variable.
+#'   predictor variable.
 #' @param residuals A vector or a dataframe containing the residuals assosiated
-#' with the data. Its length must be the same as the numer of rows in `data`
+#'   with the data. Its length must be the same as the numer of rows in `data`.
 #' @param predictor A string. The name of the column in `data` to be used as the
-#' predictor variable.
+#'   predictor variable.
 rpred_col <- function(data, residuals, predictor) {
   ggplot2::ggplot(data = data,
          mapping = ggplot2::aes(x = pull(data, predictor),
@@ -84,9 +96,16 @@ rpred_col <- function(data, residuals, predictor) {
 
 #' Matrix of Residuals Vs Predictor Plots
 #'
-#' `resid_vs_pred` uses ggplot2::ggplot to create a matrix of residual vs predictor plots
+#' `resid_vs_pred` uses ggplot2::ggplot to create a matrix of residual vs
+#' predictor plots
 #'
-#' @param A linear regression model of class `stats::lm`
+#' @param A linear regression model of class `stats::lm`.
+#'
+#' @return Returns a gridExtra object with class "gtable", "gTree", "grob", and
+#'   "gDesc".
+#'
+#' @examples
+#' resid_vs_pred(lm(brozek ~ ., data = bodyfat))
 #'
 #' @export
 resid_vs_pred <- function(model) {
@@ -100,27 +119,39 @@ resid_vs_pred <- function(model) {
 
 #' Added-Variable Plots
 #'
-#' Wrapper for `car::avPlots` with square plots and well layed out.
+#' Wrapper for `car::avPlots` with square plots and well laid out.
 #'
 #' @param model A linear regression model of class `stats::lm`
+#'
+#' @return Returns the output of car::avPlots
+#'
+#' @examples
+#' jcreg_av(lm(brozek ~ ., data = bodyfat))
 #'
 #' @export
 jcreg_av <- function(model) {
   predictors <- attr(model$terms, "term.labels")
-  rows <- floor(sqrt(length(predictors)))
-  cols <- length(predictors) / rows
+  rows <- ifelse(length(predictors > 3),
+                 floor(sqrt(length(predictors))),
+                 1)
+  cols <- ifelse(length(predictors > 3),
+                 length(predictors) / rows,
+                 3)
   par(pty = "s")
   car::avPlots(model, layout = c(rows, cols), pch = 19)
 }
 
 #' Boxplot of residuals
 #'
-#' Uses ggplot2::ggplot to create a nicely formatted box plot of the residuals of a model
+#' Uses ggplot2::ggplot to create a nicely formatted box plot of the residuals
+#' of a model
 #'
-#' @param model A linear regression model of class `stats::lm`
+#' @param model A linear regression model of class `stats::lm`.
+#'
+#' @return Returns a ggplot object.
 #'
 #' @examples
-#' jcreg_boxplot(lm(mpg ~ cyl, data = mtcars))
+#' jcreg_boxplot(lm(brozek ~ ., data = bodyfat))
 #'
 #' @export
 jcreg_boxplot <- function(model) {
@@ -146,6 +177,11 @@ jcreg_boxplot <- function(model) {
 #'
 #' @param model A linear regression model of class `stats::lm`
 #'
+#' @return Returns a ggplot object.
+#'
+#' @examples
+#' jcreg_hist(lm(brozek ~ ., data = bodyfat))
+#'
 #' @export
 jcreg_hist <- function(model) {
   residuals <- data.frame(residuals = resid(model))
@@ -163,10 +199,15 @@ jcreg_hist <- function(model) {
 
 #' Quantile - Quantile Plot
 #'
-#' Uses `autoplot` from `ggfortify` to plot a square, nicely-formatted Q-Q Plot of the residuals
-#' of a linear model.
+#' Uses `autoplot` from `ggfortify` to plot a square, nicely-formatted Q-Q Plot
+#' of the residuals of a linear model.
 #'
-#' @param model A linear regression model of class `stats::lm`
+#' @param model A linear regression model of class `stats::lm`.
+#'
+#' @return Returns a ggplot object.
+#'
+#' @examples
+#' jcreg_qq(lm(brozek ~ ., data = bodyfat))
 #'
 #' @export
 jcreg_qq <- function(model) {
@@ -180,9 +221,15 @@ jcreg_qq <- function(model) {
 #'
 #' Plots the absolute value of cook's distance against observation number.
 #'
-#' @param model A linear regression model of class `stats::lm`
+#' @param model A linear regression model of class `stats::lm`.
 #' @param nLabels The number of potential influential points to label. Defaults
-#' to 3. A value of 0 means do not label potential influential points.
+#'   to 3. A value of 0 means do not label potential influential points. There
+#'   is currently a bug where it always labels at least one point.
+#'
+#' @return Returns a ggplot object.
+#'
+#' @examples
+#' jcreg_cooksd(lm(brozek ~ ., data = bodyfat))
 #'
 #' @export
 jcreg_cooksd <- function(model, nLabels = 3) {
@@ -210,11 +257,14 @@ jcreg_cooksd <- function(model, nLabels = 3) {
 #' predictor variable. Returns a ggplot2::ggplot object.
 #'
 #' @param df_betas A dataframe containing one or more columns including the
-#' DFBETAS of the predict variable.
+#'   DFBETAS of the predict variable.
 #' @param residuals A vector or a dataframe containing the residuals assosiated
-#' with the data. Its length must be the same as the numer of rows in `data`
+#'   with the data. Its length must be the same as the numer of rows in `data`
 #' @param predictor A string. The name of the column in `data` to be used as the
-#' predictor variable.
+#'   predictor variable.
+#' @param nLabels The number of potential influential points to label. Defaults
+#'   to 3. A value of 0 means do not label potential influential points. There
+#'   is currently a bug where it always labels at least one point.
 dfb_col <- function(df_betas, predictor, nLabels = 3) {
   require(tibble)
   # Find which observations have the highest dfbetas
@@ -253,16 +303,23 @@ dfb_col <- function(df_betas, predictor, nLabels = 3) {
 #'
 #' For each predictor variable, plots the DFBETAS against observation number.
 #'
-#' @param model A linear regression model of class `stats::lm`
+#' @param model A linear regression model of class `stats::lm`.
 #' @param nLabels The number of potential influential points to label. Defaults
-#' to 3. A value of 0 means do not label potential influential points.
+#'   to 3. A value of 0 means do not label potential influential points. There
+#'   is currently a bug where it always labels at least one point.
+#'
+#' @return Returns a gridExtra object with class "gtable", "gTree", "grob", and
+#'   "gDesc".
+#'
+#' @examples
+#' jcreg_dfbetas(lm(brozek ~ ., data = bodyfat), nLabels = 2)
 #'
 #' @export
 jcreg_dfbetas <- function(model, nLabels = 3) {
   predictors <- attr(model$terms, "term.labels")
   df_betas <-  tibble::as_tibble(dfbetas(model))[, predictors]
 
-  plots <- lapply(predictors, dfb_col, df_betas = df_betas)
+  plots <- lapply(predictors, dfb_col, df_betas = df_betas, nLabels = nLabels)
   plots["ncol"] <- ceiling(sqrt(length(plots)))
   do.call(gridExtra::grid.arrange, plots)
 }
@@ -273,7 +330,13 @@ jcreg_dfbetas <- function(model, nLabels = 3) {
 #'
 #' @param model A linear regression model of class `stats::lm`
 #' @param nLabels The number of potential influential points to label. Defaults
-#' to 3. A value of 0 means do not label potential influential points.
+#'   to 3. A value of 0 means do not label potential influential points. There
+#'   is currently a bug where it always labels at least one point.
+#'
+#' @return Returns a ggplot object.
+#'
+#' @examples
+#' jcreg_dffits(lm(brozek ~ ., data = bodyfat), nLabels = 1)
 #'
 #' @export
 jcreg_dffits <- function(model, nLabels = 3) {
@@ -309,7 +372,7 @@ jcreg_dffits <- function(model, nLabels = 3) {
 #' Uses various stepwise selection and shrinkage methods to perform variable
 #' selection for a linear model.
 #'
-#' @param data A data.frame or object coercible to a data.frame whose last
+#' @param data A data.frame or object coercible to a data.frame whose **last**
 #'   column is the response variable and whose other columns are the predictor
 #'   variables.
 #' @param method A vector of variable selection methods. Options are
@@ -318,21 +381,31 @@ jcreg_dffits <- function(model, nLabels = 3) {
 #'   `IC` in `bestglm::bestglm`. Options are "AIC", "BIC", "BICg", "BICq",
 #'   "LOOCV", "CV".
 #' @param type.measure Loss to use for cross-validation in shrinkage methods.
-#'   Passed on to `type.measure` in `glmnet::cv.glmnet`. Option are "default",
+#'   Passed on to `type.measure` in `glmnet::cv.glmnet`. Options are "default",
 #'   "mse", "deviance", "class", "auc", "mae".
 #' @param row Which way to orient the table of results. By default puts methods
 #'   as rows and variables as columns. Can also be "var" which puts variables as
 #'   rows and methods and columns.
-#' @param lambda For shrinkage methods, use "lambda.1se" or "lambda.min"
+#' @param lambda For shrinkage methods, use "lambda.1se" or "lambda.min".
 #'
 #' @return Output is a list of class `var_selection` and includes a table of
 #'   booleans indicating which variables were included in the best model from
 #'   each selection method, a list containing the best model from each selection
 #'   method and the output of each selection method. Printing this object will
 #'   provide a table of the results. Also note that, for the shrinkage methods,
-#'   there is a plot of loss against lambda saved in the method object
-#'   eg. `my_var_selection$lasso$plot`.For a more detailed summary of the output you
-#'   will soon be able to use `summary`.
+#'   there is a plot of loss against lambda saved in the method object eg.
+#'   `my_var_selection$lasso$plot`. For a more detailed summary of the output you
+#'   will soon be able to use `summary`. That feature is in development.
+#'
+#' @examples
+#' # Make sure to put the predictor variable last
+#' bodyfat_reordered <- bodyfat[c("age", "weight", "height", "neck",
+#'                                "chest", "abdom","brozek")]
+#' var_selection(bodyfat_reordered)
+#' var_selection(bodyfat_reordered,
+#'               method = c("best_subsets", "seqrep", "elastic"),
+#'               metric = "AIC")
+#' var_selection(bodyfat_reordered, row = "var")
 #'
 #' @export
 var_selection <- function(data, method = "all", metric = "BIC",
@@ -341,8 +414,10 @@ var_selection <- function(data, method = "all", metric = "BIC",
   require(bestglm) # For step-wise selection
   require(glmnet) # For shrinkage methods
 
-  if(method == "all") method <- c("best_subsets", "forward", "backward",
+  if(method[1] == "all") {
+    method <- c("best_subsets", "forward", "backward",
                                     "seqrep", "lasso", "elastic")
+  }
   data <- as.data.frame(data) # In case `data` is a tibble, etc.
 
   # `cv.glmnet` requires the predictors and response to be in separate matrices

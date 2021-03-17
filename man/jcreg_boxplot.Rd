@@ -7,12 +7,16 @@
 jcreg_boxplot(model)
 }
 \arguments{
-\item{model}{A linear regression model of class \code{stats::lm}}
+\item{model}{A linear regression model of class \code{stats::lm}.}
+}
+\value{
+Returns a ggplot object.
 }
 \description{
-Uses ggplot2::ggplot to create a nicely formatted box plot of the residuals of a model
+Uses ggplot2::ggplot to create a nicely formatted box plot of the residuals
+of a model
 }
 \examples{
-jcreg_boxplot(lm(mpg ~ cyl, data = mtcars))
+jcreg_boxplot(lm(brozek ~ ., data = bodyfat))
 
 }

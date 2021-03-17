@@ -4,11 +4,13 @@
 \alias{point_matrix}
 \title{Scatterplot matrix}
 \usage{
-point_matrix(data)
+point_matrix(data, pch = 19)
 }
 \arguments{
-\item{data}{The coordinates of points given as numeric columns of a matrix
-or data frame. See parameter \code{x} in \code{pairs()} for more detail.}
+\item{data}{The coordinates of points given as numeric columns of a matrix or
+data frame. See parameter \code{x} in \code{pairs()} for more detail.}
+
+\item{pch}{Point type passed on to \code{pairs}.}
 }
 \description{
 \code{point_matrix} returns a basic scatterplot matrix of the data input.
@@ -19,6 +21,7 @@ plots and solid points. Note that for best results you should set your plot
 size to be square.
 }
 \examples{
-point_matrix(mtcars)
+point_matrix(bodyfat)
+point_matrix(mtcars[ ,c("mpg", "disp", "hp", "drat")])
 
 }

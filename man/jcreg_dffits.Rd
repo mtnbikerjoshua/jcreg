@@ -10,8 +10,16 @@ jcreg_dffits(model, nLabels = 3)
 \item{model}{A linear regression model of class \code{stats::lm}}
 
 \item{nLabels}{The number of potential influential points to label. Defaults
-to 3. A value of 0 means do not label potential influential points.}
+to 3. A value of 0 means do not label potential influential points. There
+is currently a bug where it always labels at least one point.}
+}
+\value{
+Returns a ggplot object.
 }
 \description{
 Plots the DFFITS against observation number.
+}
+\examples{
+jcreg_dffits(lm(brozek ~ ., data = bodyfat), nLabels = 1)
+
 }

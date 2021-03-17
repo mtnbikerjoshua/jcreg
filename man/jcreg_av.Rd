@@ -9,6 +9,13 @@ jcreg_av(model)
 \arguments{
 \item{model}{A linear regression model of class \code{stats::lm}}
 }
+\value{
+Returns the output of car::avPlots
+}
 \description{
-Wrapper for \code{car::avPlots} with square plots and well layed out.
+Wrapper for \code{car::avPlots} with square plots and well laid out.
+}
+\examples{
+jcreg_av(lm(brozek ~ ., data = bodyfat))
+
 }

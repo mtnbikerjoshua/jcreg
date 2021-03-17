@@ -7,11 +7,19 @@
 jcreg_cooksd(model, nLabels = 3)
 }
 \arguments{
-\item{model}{A linear regression model of class \code{stats::lm}}
+\item{model}{A linear regression model of class \code{stats::lm}.}
 
 \item{nLabels}{The number of potential influential points to label. Defaults
-to 3. A value of 0 means do not label potential influential points.}
+to 3. A value of 0 means do not label potential influential points. There
+is currently a bug where it always labels at least one point.}
+}
+\value{
+Returns a ggplot object.
 }
 \description{
 Plots the absolute value of cook's distance against observation number.
+}
+\examples{
+jcreg_cooksd(lm(brozek ~ ., data = bodyfat))
+
 }

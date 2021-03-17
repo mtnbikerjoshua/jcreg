@@ -7,8 +7,17 @@
 resid_vs_pred(model)
 }
 \arguments{
-\item{A}{linear regression model of class \code{stats::lm}}
+\item{A}{linear regression model of class \code{stats::lm}.}
+}
+\value{
+Returns a gridExtra object with class "gtable", "gTree", "grob", and
+"gDesc".
 }
 \description{
-\code{resid_vs_pred} uses ggplot2::ggplot to create a matrix of residual vs predictor plots
+\code{resid_vs_pred} uses ggplot2::ggplot to create a matrix of residual vs
+predictor plots
+}
+\examples{
+resid_vs_pred(lm(brozek ~ ., data = bodyfat))
+
 }

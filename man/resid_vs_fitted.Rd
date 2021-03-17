@@ -7,9 +7,16 @@
 resid_vs_fitted(model)
 }
 \arguments{
-\item{model}{A linear regression model of class \code{stats::lm}}
+\item{model}{A linear regression model of class \code{stats::lm}.}
+}
+\value{
+Returns a ggplot object
 }
 \description{
-\code{resid_vs_fitted} uses \code{autoplot} from \code{ggfortify} to create a square residuals vs fitted
-values plot with a nice theme
+\code{resid_vs_fitted} uses \code{autoplot} from \code{ggfortify} to create a square
+residuals vs fitted values plot with a nice theme
+}
+\examples{
+resid_vs_fitted(lm(brozek ~ ., data = bodyfat))
+
 }

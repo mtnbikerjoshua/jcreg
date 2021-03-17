@@ -4,13 +4,22 @@
 \alias{cor_graphic}
 \title{Correlation Plots}
 \usage{
-cor_graphic(data)
+cor_graphic(data, show_key = FALSE, title = TRUE)
 }
 \arguments{
 \item{data}{A numeric vector, matrix or data frame to be used as input to
 \code{cor}}
+
+\item{show_key}{If TRUE, will show a color key.}
+
+\item{title}{If FALSE, will hide titles.}
 }
 \description{
 \code{cor_graphic} uses the "corrplot" package to create a nice graphic with a
-color-coded correlation matrix and correlation plot side-by-side
+color-coded correlation matrix and correlation plot side-by-side. Note that
+if plot dimensions are too short or too small, there will be overlapping.
+}
+\examples{
+cor_graphic(bodyfat)
+
 }
