@@ -24,3 +24,6 @@ install.packages("devtools")
 library(devtools)
 install_github("https://github.com/mtnbikerjoshua/jcreg")
 ```
+
+## Contributing
+I welcome suggestions, comments, and contributions. If you find a bug or want to request a feature please open an issue. If you simply want to make suggestions or comments or want to contact me directly, please send me an email at <mtnbikerjoshua@gmail.com>. If you would like to contribute to the code or documentation, please fork the project and submit a pull request.
