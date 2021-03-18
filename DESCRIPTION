@@ -13,7 +13,9 @@ Imports:
   ggfortify,
   car,
   corrplot,
-  gridExtra
+  gridExtra,
+  bestglm,
+  glmnet
 License: `use_mit_license()`
 Encoding: UTF-8
 LazyData: true
