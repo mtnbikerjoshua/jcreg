@@ -423,7 +423,7 @@ var_selection <- function(data, method = "all", metric = "BIC",
 
   # `cv.glmnet` requires the predictors and response to be in separate matrices
   predictors_matrix <- as.matrix(data[-length(data)])
-  response_matrix <- as.matrix(data[length(data)])
+  response_matrix <- as.matrix(as.numeric(pull(data, length(data))))
 
   # A list of best models from each method
   best_models <- vector(mode = "list", length = length(method))
