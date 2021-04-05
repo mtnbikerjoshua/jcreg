@@ -410,7 +410,7 @@ jcreg_dffits <- function(model, nLabels = 3) {
 #' @export
 var_selection <- function(data, method = "all", metric = "BIC",
                           type.measure = "default", row = "method",
-                          lambda = "lambda.1se") {
+                          lambda = "lambda.1se", ...) {
   require(bestglm) # For step-wise selection
   require(glmnet) # For shrinkage methods
   require(ggfortify) # For autoplot of lambdas
@@ -430,19 +430,19 @@ var_selection <- function(data, method = "all", metric = "BIC",
   names(best_models) <- method
 
   if("best_subsets" %in% method) {
-    best_subsets <- bestglm(data, IC = metric, method = "exhaustive")
+    best_subsets <- bestglm(data, IC = metric, method = "exhaustive", ...)
     best_models$best_subsets <- best_subsets$BestModel
   }
   if("forward" %in% method) {
-    forward <- bestglm(data, IC = metric, method = "forward")
+    forward <- bestglm(data, IC = metric, method = "forward", ...)
     best_models$forward <- forward$BestModel
   }
   if("backward" %in% method) {
-    backward <- bestglm(data, IC = metric, method = "backward")
+    backward <- bestglm(data, IC = metric, method = "backward", ...)
     best_models$backward <- backward$BestModel
   }
   if("seqrep" %in% method) {
-    seqrep <- bestglm(data, IC = metric, method = "seqrep")
+    seqrep <- bestglm(data, IC = metric, method = "seqrep", ...)
     best_models$seqrep <- seqrep$BestModel
   }
   if("lasso" %in% method) {
