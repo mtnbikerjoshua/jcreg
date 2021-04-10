@@ -10,7 +10,8 @@ var_selection(
   metric = "BIC",
   type.measure = "default",
   row = "method",
-  lambda = "lambda.1se"
+  lambda = "lambda.1se",
+  ...
 )
 }
 \arguments{
