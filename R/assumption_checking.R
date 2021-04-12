@@ -57,7 +57,7 @@ cor_graphic <- function(data, show_key = FALSE, title = TRUE) {
 #'
 #' @param model A linear regression model of class `stats::lm`.
 #'
-#' @return Returns a ggplot object
+#' @return Returns an autoplot object
 #'
 #' @examples
 #' resid_vs_fitted(lm(brozek ~ ., data = bodyfat))
@@ -204,7 +204,7 @@ jcreg_hist <- function(model) {
 #'
 #' @param model A linear regression model of class `stats::lm`.
 #'
-#' @return Returns a ggplot object.
+#' @return Returns an autoplot object.
 #'
 #' @examples
 #' jcreg_qq(lm(brozek ~ ., data = bodyfat))
