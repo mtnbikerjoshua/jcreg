@@ -57,7 +57,7 @@ cor_graphic <- function(data, show_key = FALSE, title = TRUE) {
 #'
 #' @param model A linear regression model of class `stats::lm`.
 #'
-#' @return Returns a ggplot object
+#' @return Returns an autoplot object
 #'
 #' @examples
 #' resid_vs_fitted(lm(brozek ~ ., data = bodyfat))
@@ -204,7 +204,7 @@ jcreg_hist <- function(model) {
 #'
 #' @param model A linear regression model of class `stats::lm`.
 #'
-#' @return Returns a ggplot object.
+#' @return Returns an autoplot object.
 #'
 #' @examples
 #' jcreg_qq(lm(brozek ~ ., data = bodyfat))
@@ -356,14 +356,14 @@ jcreg_dffits <- function(model, nLabels = 3) {
     ggplot2::theme(aspect.ratio = 1)
   if(length(df_fits) <= 30) {
     df_fits_plot +
-      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept =
-                                 2 * sqrt(length(model$coefficients) /
-                                            length(df_fits))),
-                 color = "red", linetype = "dashed")
+      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1),
+                          color = "red", linetype = "dashed")
   }else {
     df_fits_plot +
-      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept = 1),
-                 color = "red", linetype = "dashed")
+      ggplot2::geom_hline(mapping = ggplot2::aes(yintercept =
+                                                   2 * sqrt(length(model$coefficients) /
+                                                              length(df_fits))),
+                          color = "red", linetype = "dashed")
   }
 }
 
